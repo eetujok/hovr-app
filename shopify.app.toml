@@ -1,0 +1,26 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "8594daf9c19b6d35cc6917358d5dd64d"
+name = "Hovr: Video On Hover"
+handle = "hovr-video-on-hover"
+application_url = "https://preview-product.gadget.app/api/shopify/install-or-render"
+embedded = true
+
+[build]
+dev_store_url = "seetext-5.myshopify.com"
+include_config_on_deploy = true
+
+[auth]
+redirect_urls = [
+  "https://preview-product.gadget.app/api/connections/auth/shopify/callback"
+]
+
+[webhooks]
+api_version = "2024-07"
+
+  [[webhooks.subscriptions]]
+  uri = "https://preview-product.gadget.app/api/webhooks/shopify"
+  compliance_topics = [ "customers/redact", "customers/data_request", "shop/redact" ]
+
+[pos]
+embedded = false

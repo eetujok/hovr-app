@@ -1,0 +1,557 @@
+{% if template.name == 'collection' or template.name == 'index' or template.name == 'search' or template.name == 'page' or template.name == 'metaobject'  %}
+
+    {% assign appData = app.metafields.seetext.stream_links.value %}
+    {% assign transitionEnum = block.settings.transition %}
+    {% assign settingsSelectors = block.settings.image_selectors %}
+    {% assign customTheme = block.settings.custom_theme %}
+    <script>
+
+
+    try {
+
+    // Function to add srcImage to selectors
+    const buildSelectors = (selectors, srcImage) => {
+            const arr = selectors
+                .trim()
+                .split(",")
+                .map((selector) => {
+                    // Handle both PNG and JPG cases
+                    const imageNameWithoutExt = srcImage.replace(/\.(jpg|png)$/, '');
+                    return `img[${selector.trim()}*='${imageNameWithoutExt}']`;
+                });
+            return arr.join(", ");
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Hovr initialized")
+        var appData = {{ appData | json }}.links;
+        var transitionEnum = {{ transitionEnum  }} 
+        var settingsSelectors = '{{ settingsSelectors }}'
+        var customTheme = '{{ customTheme }}'.toLowerCase()  // Convert to lowercase for easier comparison
+
+        // Use default theme unless explicitly set to "shapes"
+        if (customTheme !== 'shapes' && customTheme !== 'streamingvault') {
+            customTheme = 'default';
+        }
+
+        if (customTheme == 'default' || customTheme == 'streamingvault') {
+            console.log("Default theme")
+            // Function to add srcImage to selectors - moved up
+            
+            // Add StreamingVault specific fixes
+            if (customTheme == 'streamingvault') {
+                // Apply fixes only to relevant products using appData
+                appData.forEach(function(dataItem) {
+                    var srcRoot = dataItem.srcImage
+                        .replace(/^.*\//, '')
+                        .replace(/\?.*$/, '')
+                        .replace(/\.jpg$/, '');
+                    
+                    // Build selector for matching images
+                    var modifiedSelectors = buildSelectors(settingsSelectors, srcRoot);
+                    var targetImages = document.querySelectorAll(modifiedSelectors);
+                    
+                    targetImages.forEach(function(image) {
+                        const productLink = image.closest('a.product__media');
+                        if (productLink) {
+                            productLink.style.setProperty('--aspect-ratio', '9999999');
+                            image.style.borderRadius = '15px';
+                        }
+                    });
+                });
+            }
+            
+            // Add document-wide click listener to stop videos
+            document.addEventListener('click', function(e) {
+                // Check if the click was outside any product link
+                if (!e.target.closest('a[href*="products/"]')) {
+                    // Find and stop only hover videos
+                    const hoverVideos = document.querySelectorAll('video.hovr-video');
+                    hoverVideos.forEach(function(video) {
+                        video.style.opacity = "0";
+                        video.pause();
+                        video.currentTime = 0;
+                        
+                        // Reset opacity of associated images
+                        const parentNode = video.parentNode;
+                        if (parentNode) {
+                            const images = parentNode.querySelectorAll('img');
+                            images.forEach(function(img) {
+                                img.style.opacity = "1";
+                            });
+                        }
+                    });
+                }
+            });
+
+            function attachListenersToImages(dataItem) {
+                var srcRoot = dataItem.srcImage
+                    // Remove file extension and query parameters
+                    .replace(/\?.*$/, '')  // Remove query parameters first
+                    .replace(/\.(jpg|png)$/, '')  // Remove extension
+                    .replace(/^files\//, '');  // Remove 'files/' prefix if present
+                
+                // e.g. "front_fa7402ef-773b-4ef6-ac4b-b64df213e800.jpg"
+                // Item from appData object
+                var srcImage = dataItem.srcImage;
+                var streamLink = dataItem.streamLink;
+                var handle = dataItem.handle;
+
+                // Add srcImage to user-defined selectors
+                var modifiedSelectors = buildSelectors(settingsSelectors, srcRoot);
+                
+                var images = document.querySelectorAll(modifiedSelectors);
+                var links = document.querySelectorAll('a[href*="'+ handle +'"]');
+
+
+                images.forEach(function(image) {
+                    
+                    if (image.hasAttribute('data-video-attached')) {
+                        return; // Skip if already processed
+                    }
+
+                    var parentElement = image.closest('.search');
+                    if (!parentElement) { // Only proceed if the parent does not contain "search"
+                    var existingVideo = image.parentNode.querySelector('video');
+                    if ( !existingVideo ) {
+
+
+                    links.forEach(function(link) {
+                        if (!link.closest('.search')) { 
+                        var video = document.createElement('video');
+                        video.classList.add('hovr-video');
+                        
+                        // Add CSS class for initial state
+                        video.style.backgroundColor = 'transparent';
+                        video.style.visibility = 'hidden';  // Hide video initially
+                        video.src = streamLink + '#t=0.1';
+                        
+                        // Listen for loadeddata event to ensure video is ready
+                        video.addEventListener('loadeddata', function() {
+                            video.style.visibility = 'visible';  // Show video only when loaded
+                        });
+
+                        video.preload = 'none';  // Initially, do not preload
+                        
+                        // Check if mobile device
+                        if (/Mobi|Android/i.test(navigator.userAgent)) {
+                            video.preload = 'auto';  // Preload immediately on mobile
+                        }
+                        
+                        video.muted = true;
+                        video.loop = true;
+                        video.playsInline = true;
+                        video.background = 'transparent'
+                        video.setAttribute('playsinline', '');
+                        video.setAttribute('webkit-playsinline', '');
+                        video.controls = false;
+                        video.style.position = "absolute";
+                        video.style.top = "0";
+                        video.style.left = "0";
+                        video.style.width = "100%";
+                        video.style.height = "100%";
+                        video.style.objectFit = "cover";
+                        video.style.opacity = "0";
+                        
+                        if ( transitionEnum ) {
+                            video.style.transition = "opacity 0.3s ease-in-out";
+                        }
+
+                        video.currentTime = 0;
+                        
+                        video.addEventListener('error', function(event) {
+                            console.error("Error loading video:", event);
+                        });
+
+                        // Position the video behind the image
+                        image.parentNode.insertBefore(video, image);
+                        
+                        // Just after inserting and setting up the video
+                        image.setAttribute('data-video-attached', 'true');
+
+                        // Now disable the secondary image (for thrillseekers.com):
+                        var secondaryContainer = image.closest('.grid-product__image-mask')?.querySelector('.grid-product__secondary-image.small--hide');
+                        
+                        if (secondaryContainer) {
+                        secondaryContainer.remove();
+                        }
+                    
+
+                        if ( transitionEnum ) {
+                            image.style.transition = "opacity 0.3s ease-in-out";
+                        }
+    
+                        var preloadObserver = new IntersectionObserver(function(entries, observer) {
+                            entries.forEach(function(entry) {
+                                if (entry.isIntersecting) {
+                                    video.preload = 'auto';  // Preload the video once in viewport
+                                    // Optional: unobserve to prevent future calls
+                                    observer.unobserve(entry.target);
+                                }
+                            });
+                        });
+                        // Start observing the image
+                        preloadObserver.observe(image);
+
+    
+                        link.addEventListener('mouseover', function() {
+                            // Only proceed if video is actually loaded
+                            if (video.readyState >= 3) {  // HAVE_FUTURE_DATA or better
+                                // Fade out all images within the same parent div
+                                var siblingImages = image.parentNode.querySelectorAll('img');
+                                siblingImages.forEach(function(siblingImage) {
+                                    siblingImage.style.opacity = "0";
+                                    siblingImage.style.transition = 'none'
+                                    siblingImage.style.animation = "none"
+                                });
+                                video.style.opacity = "1";
+                                
+                                // Play the video
+                                video.play().catch(function(error) {
+                                    console.error("Error playing video:", error);
+                                });
+                            }
+                        });
+
+                        // Modified touch events for mobile
+                        let touchStartY;
+                        let touchStartTime;
+                        let isTouchMove = false;
+
+                        link.addEventListener('touchstart', function(e) {
+                            touchStartY = e.touches[0].clientY;
+                            touchStartTime = Date.now();
+                            isTouchMove = false;
+                            
+                            // Fade out all images within the same parent div
+                            var siblingImages = image.parentNode.querySelectorAll('img');
+                            siblingImages.forEach(function(siblingImage) {
+                                siblingImage.style.opacity = "0";
+                                siblingImage.style.transition = 'none'
+                                siblingImage.style.animation = "none"
+                            });
+                            
+                            video.style.opacity = "1";
+                            
+                            // Play the video
+                            video.play().catch(function(error) {
+                                console.error("Error playing video:", error);
+                            });
+                        });
+
+                        link.addEventListener('touchmove', function(e) {
+                            const touchMoveY = e.touches[0].clientY;
+                            const deltaY = Math.abs(touchMoveY - touchStartY);
+                            
+                            // Consider it a move if user moved more than 10px
+                            if (deltaY > 10) {
+                                isTouchMove = true;
+                            }
+                        });
+
+                        link.addEventListener('touchend', function(e) {
+                            const touchDuration = Date.now() - touchStartTime;
+                            
+                            // If it was a quick tap (less than 200ms) and minimal movement,
+                            // treat it as a click and allow default behavior
+                            if (!isTouchMove && touchDuration < 200) {
+                                // Don't prevent default - allow link navigation
+                                video.style.opacity = "0";
+                                image.style.opacity = "1";
+                                return;
+                            }
+
+                            // Otherwise handle as a video preview interaction
+                            e.preventDefault();
+
+                            if (transitionEnum === false) {
+                                video.pause();
+                                video.currentTime = 0;
+                            }
+
+                            video.style.opacity = "0";
+                            image.style.opacity = "1";
+                            
+                            video.addEventListener('transitionend', function() {
+                                video.pause()
+                                video.currentTime = 0;
+                            }, { once: true });
+                        });
+
+                        link.addEventListener('mouseout', function() {
+
+                            if ( transitionEnum === false ) {
+                                video.pause();
+                                video.currentTime = 0;
+                            }
+
+                            video.style.opacity = "0";
+                            image.style.opacity = "1";
+                            
+                            video.addEventListener('transitionend', function() {
+                                video.pause()
+                                video.currentTime = 0;
+                            }, { once: true });
+                        });
+                    }
+                    });
+                    }
+                }
+                });
+
+            }
+    
+            appData.forEach(function(dataItem) {
+                attachListenersToImages(dataItem);
+            });
+
+            // After processing all initial images:
+            var observer = new MutationObserver(function(mutationsList) {
+                mutationsList.forEach(function(mutation) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        // If new nodes are added, try re-attaching video logic to any newly added images
+                        appData.forEach(function(dataItem) {
+                            attachListenersToImages(dataItem);
+                        });
+                    }
+                });
+            });
+
+            // Start observing after initial setup
+            observer.observe(document.body, { childList: true, subtree: true });
+            console.log("Default theme")
+    
+        } else if (customTheme == 'shapes') {
+            console.log("Shapes theme")
+
+            const buildSelectorsShapes = (selectors, srcImage) => {
+                const arr = selectors
+                    .trim()
+                    .split(",")
+                    .map((selector) => `img[${selector.trim()}*='${srcImage}']`);
+                return arr.join(", ");
+            };
+                    // Add document-wide click listener to stop videos
+            document.addEventListener('click', function(e) {
+                // Check if the click was outside any product link
+                if (!e.target.closest('a[href*="products/"]')) {
+                    // Find and stop only hover videos
+                    const hoverVideos = document.querySelectorAll('video.hovr-video');
+                    hoverVideos.forEach(function(video) {
+                        video.style.opacity = "0";
+                        video.pause();
+                        video.currentTime = 0;
+                        
+                        // Reset opacity of associated images
+                        const parentNode = video.parentNode;
+                        if (parentNode) {
+                            const images = parentNode.querySelectorAll('img');
+                            images.forEach(function(img) {
+                                img.style.opacity = "1";
+                            });
+                        }
+                    });
+                }
+            });
+
+            function attachListenersToImages(dataItem) {
+                var srcRoot = dataItem.srcImage
+                    .replace(/^.*\//, '')
+                    // Remove any "?v=..." query string or anything after the question mark:
+                    .replace(/\?.*$/, '')
+                    .replace(/\.jpg$/, '');
+                
+                var srcImage = dataItem.srcImage;
+                var streamLink = dataItem.streamLink;
+                var handle = dataItem.handle;
+
+                var modifiedSelectors = buildSelectorsShapes(settingsSelectors, srcRoot);
+                var images = document.querySelectorAll(modifiedSelectors);
+                
+                images.forEach(function(image) {
+                    // Prevent re-processing of the same image
+                    if (image.hasAttribute('data-video-attached')) {
+                        return;
+                    }
+
+                    // Use the closest anchor tag relative to the image.
+                    var link = image.closest('a');
+                    if (!link) return;
+
+                    // Optionally validate the link: it should be for the same product.
+                    if (!link.href || !link.href.includes(handle)) return;
+                    
+                    // Create and set up the video element
+                    var video = document.createElement('video');
+                    video.classList.add('hovr-video');
+                    video.style.backgroundColor = 'transparent';
+                    video.style.visibility = 'hidden';  // Hidden initially
+                    video.src = streamLink + '#t=0.1';
+                    video.preload = 'none';
+                    
+                    // Preload adjustments for mobile
+                    if (/Mobi|Android/i.test(navigator.userAgent)) {
+                        video.preload = 'auto';
+                    }
+                    
+                    // Basic video setup
+                    video.muted = true;
+                    video.loop = true;
+                    video.playsInline = true;
+                    video.style.position = "absolute";
+                    video.style.top = "0";
+                    video.style.left = "0";
+                    video.style.width = "100%";
+                    video.style.height = "100%";
+                    video.style.objectFit = "cover";
+                    video.style.opacity = "0";
+                    if (transitionEnum) {
+                        video.style.transition = "opacity 0.3s ease-in-out";
+                    }
+                    
+                    // Insert the video element before the image and mark as processed
+                    image.parentNode.insertBefore(video, image);
+                    image.setAttribute('data-video-attached', 'true');
+                    
+                    // Observer to trigger preload when the image appears in the viewport
+                    var preloadObserver = new IntersectionObserver(function(entries, observer) {
+                        entries.forEach(function(entry) {
+                            if (entry.isIntersecting) {
+                                video.preload = 'auto';
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    });
+                    preloadObserver.observe(image);
+                    
+                    // Bind event listeners on the local (nearest) link for shapes integration:
+
+                    // Mouseover event (for desktop)
+                    link.addEventListener('mouseover', function() {
+                        if (video.readyState >= 3) {  // Check if the video is ready
+                            var siblingImages = image.parentNode.querySelectorAll('img');
+                            siblingImages.forEach(function(siblingImage) {
+                                siblingImage.style.opacity = "0";
+                            });
+                            video.style.visibility = "visible"; // Make the video visible
+                            video.style.opacity = "1";
+                            video.play().catch(function(error) {
+                                console.error("Error playing video:", error);
+                            });
+                        }
+                    });
+                    
+                    // Touchstart event (activate video on mobile touch)
+                    link.addEventListener('touchstart', function(e) {
+                        var siblingImages = image.parentNode.querySelectorAll('img');
+                        siblingImages.forEach(function(siblingImage) {
+                            siblingImage.style.opacity = "0";
+                        });
+                        video.style.visibility = "visible"; // Make the video visible
+                        video.style.opacity = "1";
+                        video.play().catch(function(error) {
+                            console.error("Error playing video:", error);
+                        });
+                    });
+                    
+                    // Touchend event to stop the video when the touch ends
+                    link.addEventListener('touchend', function(e) {
+                        video.style.opacity = "0";
+                        var siblingImages = image.parentNode.querySelectorAll('img');
+                        siblingImages.forEach(function(siblingImage) {
+                            siblingImage.style.opacity = "1";
+                        });
+                        video.addEventListener('transitionend', function() {
+                            video.pause();
+                            video.currentTime = 0;
+                            video.style.visibility = "hidden"; // Hide the video again
+                        }, { once: true });
+                    });
+                    
+                    // Touchcancel event (in case the touch event is canceled)
+                    link.addEventListener('touchcancel', function(e) {
+                        video.style.opacity = "0";
+                        var siblingImages = image.parentNode.querySelectorAll('img');
+                        siblingImages.forEach(function(siblingImage) {
+                            siblingImage.style.opacity = "1";
+                        });
+                        video.addEventListener('transitionend', function() {
+                            video.pause();
+                            video.currentTime = 0;
+                            video.style.visibility = "hidden"; // Hide the video again
+                        }, { once: true });
+                    });
+                    
+                    // Mouseout event as a fallback
+                    link.addEventListener('mouseout', function() {
+                        video.style.opacity = "0";
+                        var siblingImages = image.parentNode.querySelectorAll('img');
+                        siblingImages.forEach(function(siblingImage) {
+                            siblingImage.style.opacity = "1";
+                        });
+                        video.addEventListener('transitionend', function() {
+                            video.pause();
+                            video.currentTime = 0;
+                            video.style.visibility = "hidden"; // Hide the video again
+                        }, { once: true });
+                    });
+                });
+            }
+
+            appData.forEach(function(dataItem) {
+                attachListenersToImages(dataItem);
+            });
+
+            // After processing all initial images:
+            var observer = new MutationObserver(function(mutationsList) {
+                mutationsList.forEach(function(mutation) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        // If new nodes are added, try re-attaching video logic to any newly added images
+                        appData.forEach(function(dataItem) {
+                            attachListenersToImages(dataItem);
+                        });
+                    }
+                });
+            });
+
+            // Start observing after initial setup
+            observer.observe(document.body, { childList: true, subtree: true });
+                }
+            });
+            } catch (error) {
+                console.log(error, "Error in hover video extension.")
+            }
+    </script>
+
+
+{% endif %}
+
+{% schema %}
+{
+"name": "Video On Hover",
+"target": "body",
+"available_if": "{{ app.metafields.seetext.extension_enabled }}",
+"settings": [
+    {
+        "type": "checkbox",
+        "id": "transition",
+        "label": "Transition effect",
+        "default": false
+    },
+    {
+        "type": "text",
+        "id": "image_selectors",
+        "label": "(Advanced) Image selectors",
+        "info": "Don't modify unless you know what you are doing. Default is: src, srcset",
+        "default": "src, srcset, data-src, data-srcset"
+    },
+    {
+        "type": "text",
+        "id": "custom_theme",
+        "label": "(Advanced) Custom theme",
+        "info": "If you are using a custom theme integration, you may need to add your theme name here.",
+        "default": "default"
+    }
+]
+}
+{% endschema %}

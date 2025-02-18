@@ -1,0 +1,529 @@
+  var spotlightVideoMachine_getProductIDs;
+  (function() {
+      var disable = location.search.indexOf('svm-disable') !== -1;
+      var svm_log = console.log;
+      var storedProducts = {
+          "gid://shopify/Product/9312980631852": ["the-hidden-snowboard", "https://cdn.shopify.com/s/files/1/0875/7270/9676/files/Spotlight_Video_The_Hidden_Snowboard.mp4?v=1721509685", "gid://shopify/GenericFile/38980236280108"],
+          "gid://shopify/Product/9312980533548": ["the-collection-snowboard-hydrogen", "https://cdn.shopify.com/s/files/1/0875/7270/9676/files/Spotlight_Video_The_Collection_Snowboard_Hydrogen.mp4?v=1721299582", "gid://shopify/GenericFile/38947865329964"],
+          "gid://shopify/Product/9312980500780": ["the-videographer-snowboard", "https://cdn.shopify.com/s/files/1/0875/7270/9676/files/Spotlight_Video_The_Videographer_Snowboard.mp4?v=1721024906", "gid://shopify/GenericFile/38913612611884"]
+      } || {};
+      var options = {
+          "suspended": true,
+          "additionalImageSelectors": "img[src*=\"files\"],img[srcset*=\"files\"]"
+      } || {};
+      var pageType = "index";
+      var Video = function(e, t) {
+              function n() {
+                  i.onLoadedData && i.onLoadedData(), loadVideos(videos)
+              }
+              var o = document.createElement("video"),
+                  i = (o.setAttribute("id", "svm-video-" + e), o.classList.add("svm-video"), o.muted = "true", o.setAttribute("loop", "true"), o.setAttribute("preload", "metadata"), o.setAttribute("playsinline", "true"), o.src = t + "#t=0.1", o.style.transition = "opacity " + (isIos ? .3 : .1) + "s ease", o.style.opacity = 0, o.setAttribute("preload", "metadata"), this);
+              isIos ? o.addEventListener("loadedmetadata", n, !1) : o.addEventListener("loadeddata", n, !1), this.setCSS = function(t) {
+                  Object.keys(t).forEach(function(e) {
+                      o.style[e] = t[e]
+                  })
+              }, this.node = o
+          },
+          isIos = /iPad|iPhone|iPod/.test(navigator.userAgent),
+          loadVideos = function(e) {
+              e.forEach(function(e) {
+                  isElementInViewport(e.node) ? (e.loaded || (e.node.load(), e.loaded = !0, isIos || (e.node.style.opacity = 1)), e.playing || e.node.play().then(function() {
+                      e.playing = !0, isIos && (e.node.style.opacity = 1)
+                  }).catch(e => {})) : e.playing && (e.playing = !1, e.node.pause())
+              })
+          },
+          checkNodeRemoval = function(i) {
+              return new Promise(function(t) {
+                  let n = document.body.contains(i);
+                  var o = new MutationObserver(function(e) {
+                      document.body.contains(i) ? n = !0 : n && (n = !1, t(), o.disconnect())
+                  });
+                  o.observe(document.body, {
+                      childList: !0,
+                      subtree: !0
+                  })
+              })
+          },
+          productNameFromUri = function(e) {
+              try {
+                  var t = e.split("/products/")[1];
+                  return t = -1 !== (t = -1 !== t.indexOf("#") ? t.substring(0, t.indexOf("#")) : t).indexOf("?") ? t.substring(0, t.indexOf("?")) : t
+              } catch (e) {
+                  return null
+              }
+          },
+          shift = function(e, t) {
+              let n = e;
+              for (var o = 0; o < t; o++) n = n.parentNode;
+              return n
+          },
+          isElementInViewport = function(e) {
+              e = e.getBoundingClientRect();
+              return 0 < e.width && 0 < e.height && 0 <= e.top + e.height && e.bottom - e.height <= (window.innerHeight || document.documentElement.clientHeight)
+          },
+          debug = -1 !== location.search.indexOf("svm-debug");
+      const UNDEFINED = "undefined";
+      let isMobile = !1;
+      if (! function(e) {
+              (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(e) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(e.substr(0, 4))) && (isMobile = !0)
+          }(navigator.userAgent || navigator.vendor || window.opera), options.visibilityOnDevices && ("hidden" === options.visibilityOnDevices.mobile && isMobile && (disable = !0), "hidden" !== options.visibilityOnDevices.desktop || isMobile || (disable = !0)), !disable) {
+          var previewIndicator, p, button, note, template = "index",
+              isProductPage = "product" === template,
+              Arrive = (debug && svm_log("storedProducts,template,isProductPage", storedProducts, template, isProductPage), spotlightVideoMachine_getProductIDs = function() {
+                  return Object.keys(storedProducts).map(function(e) {
+                      return e
+                  })
+              }, function(l, e, c) {
+                  "use strict";
+
+                  function t(e, t, n) {
+                      p.addMethod(t, n, e.unbindEvent), p.addMethod(t, n, e.unbindEventWithSelectorOrCallback), p.addMethod(t, n, e.unbindEventWithSelectorAndCallback)
+                  }
+
+                  function n(e) {
+                      e.arrive = i.bindEvent, t(i, e, "unbindArrive"), e.leave = a.bindEvent, t(a, e, "unbindLeave")
+                  }
+                  var o, p, u, r, i, a, s;
+                  if (l.MutationObserver && "undefined" != typeof HTMLElement) return o = 0, s = HTMLElement.prototype.matches || HTMLElement.prototype.webkitMatchesSelector || HTMLElement.prototype.mozMatchesSelector || HTMLElement.prototype.msMatchesSelector, p = {
+                      matchesSelector: function(e, t) {
+                          return e instanceof HTMLElement && s.call(e, t)
+                      },
+                      addMethod: function(e, t, n) {
+                          var o = e[t];
+                          e[t] = function() {
+                              return n.length == arguments.length ? n.apply(this, arguments) : "function" == typeof o ? o.apply(this, arguments) : c
+                          }
+                      },
+                      callCallbacks: function(e, t) {
+                          t && t.options.onceOnly && 1 == t.firedElems.length && (e = [e[0]]);
+                          for (var n, o = 0; n = e[o]; o++) n && n.callback && n.callback.call(n.elem, n.elem);
+                          t && t.options.onceOnly && 1 == t.firedElems.length && t.me.unbindEventWithSelectorAndCallback.call(t.target, t.selector, t.callback)
+                      },
+                      checkChildNodesRecursively: function(e, t, n, o) {
+                          for (var i, s = 0; i = e[s]; s++) n(i, t, o) && o.push({
+                              callback: t.callback,
+                              elem: i
+                          }), 0 < i.childNodes.length && p.checkChildNodesRecursively(i.childNodes, t, n, o)
+                      },
+                      mergeArrays: function(e, t) {
+                          var n, o = {};
+                          for (n in e) e.hasOwnProperty(n) && (o[n] = e[n]);
+                          for (n in t) t.hasOwnProperty(n) && (o[n] = t[n]);
+                          return o
+                      },
+                      toElementsArray: function(e) {
+                          return e = c === e || "number" == typeof e.length && e !== l ? e : [e]
+                      }
+                  }, d.prototype.addEvent = function(e, t, n, o) {
+                      e = {
+                          target: e,
+                          selector: t,
+                          options: n,
+                          callback: o,
+                          firedElems: []
+                      };
+                      return this._beforeAdding && this._beforeAdding(e), this._eventsBucket.push(e), e
+                  }, d.prototype.removeEvent = function(e) {
+                      for (var t, n = this._eventsBucket.length - 1; t = this._eventsBucket[n]; n--) e(t) && (this._beforeRemoving && this._beforeRemoving(t), (t = this._eventsBucket.splice(n, 1)) && t.length && (t[0].callback = null))
+                  }, d.prototype.beforeAdding = function(e) {
+                      this._beforeAdding = e
+                  }, d.prototype.beforeRemoving = function(e) {
+                      this._beforeRemoving = e
+                  }, u = d, r = function(i, s) {
+                      var r = new u,
+                          a = this,
+                          d = {
+                              fireOnAttributesModification: !1
+                          };
+                      return r.beforeAdding(function(t) {
+                          var e, n = t.target,
+                              o = (n !== l.document && n !== l || (n = document.getElementsByTagName("html")[0]), e = new MutationObserver(function(e) {
+                                  s.call(this, e, t)
+                              }), i(t.options));
+                          e.observe(n, o), t.observer = e, t.me = a
+                      }), r.beforeRemoving(function(e) {
+                          e.observer.disconnect()
+                      }), this.bindEvent = function(e, t, n) {
+                          t = p.mergeArrays(d, t);
+                          for (var o = p.toElementsArray(this), i = 0; i < o.length; i++) r.addEvent(o[i], e, t, n)
+                      }, this.unbindEvent = function() {
+                          var n = p.toElementsArray(this);
+                          r.removeEvent(function(e) {
+                              for (var t = 0; t < n.length; t++)
+                                  if (this === c || e.target === n[t]) return !0;
+                              return !1
+                          })
+                      }, this.unbindEventWithSelectorOrCallback = function(n) {
+                          var o = p.toElementsArray(this),
+                              i = n;
+                          r.removeEvent("function" == typeof n ? function(e) {
+                              for (var t = 0; t < o.length; t++)
+                                  if ((this === c || e.target === o[t]) && e.callback === i) return !0;
+                              return !1
+                          } : function(e) {
+                              for (var t = 0; t < o.length; t++)
+                                  if ((this === c || e.target === o[t]) && e.selector === n) return !0;
+                              return !1
+                          })
+                      }, this.unbindEventWithSelectorAndCallback = function(n, o) {
+                          var i = p.toElementsArray(this);
+                          r.removeEvent(function(e) {
+                              for (var t = 0; t < i.length; t++)
+                                  if ((this === c || e.target === i[t]) && e.selector === n && e.callback === o) return !0;
+                              return !1
+                          })
+                      }, this
+                  }, i = new function() {
+                      function s(e, t) {
+                          return !(!p.matchesSelector(e, t.selector) || (e._id === c && (e._id = o++), -1 != t.firedElems.indexOf(e._id))) && (t.firedElems.push(e._id), !0)
+                      }
+                      var d = {
+                              fireOnAttributesModification: !1,
+                              onceOnly: !1,
+                              existing: !1
+                          },
+                          l = (i = new r(function(e) {
+                              var t = {
+                                  attributes: !1,
+                                  childList: !0,
+                                  subtree: !0
+                              };
+                              return e.fireOnAttributesModification && (t.attributes = !0), t
+                          }, function(e, i) {
+                              e.forEach(function(e) {
+                                  var t = e.addedNodes,
+                                      n = e.target,
+                                      o = [];
+                                  null !== t && 0 < t.length ? p.checkChildNodesRecursively(t, i, s, o) : "attributes" === e.type && s(n, i) && o.push({
+                                      callback: i.callback,
+                                      elem: n
+                                  }), p.callCallbacks(o, i)
+                              })
+                          })).bindEvent;
+                      return i.bindEvent = function(e, t, n) {
+                          t = c === n ? (n = t, d) : p.mergeArrays(d, t);
+                          var o = p.toElementsArray(this);
+                          if (t.existing) {
+                              for (var i = [], s = 0; s < o.length; s++)
+                                  for (var r = o[s].querySelectorAll(e), a = 0; a < r.length; a++) i.push({
+                                      callback: n,
+                                      elem: r[a]
+                                  });
+                              if (t.onceOnly && i.length) return n.call(i[0].elem, i[0].elem);
+                              setTimeout(p.callCallbacks, 1, i)
+                          }
+                          l.call(this, e, t, n)
+                      }, i
+                  }, a = new function() {
+                      function o(e, t) {
+                          return p.matchesSelector(e, t.selector)
+                      }
+                      var i = {},
+                          s = (a = new r(function() {
+                              return {
+                                  childList: !0,
+                                  subtree: !0
+                              }
+                          }, function(e, n) {
+                              e.forEach(function(e) {
+                                  var e = e.removedNodes,
+                                      t = [];
+                                  null !== e && 0 < e.length && p.checkChildNodesRecursively(e, n, o, t), p.callCallbacks(t, n)
+                              })
+                          })).bindEvent;
+                      return a.bindEvent = function(e, t, n) {
+                          t = c === n ? (n = t, i) : p.mergeArrays(i, t), s.call(this, e, t, n)
+                      }, a
+                  }, e && n(e.fn), n(HTMLElement.prototype), n(NodeList.prototype), n(HTMLCollection.prototype), n(HTMLDocument.prototype), n(Window.prototype), t(i, e = {}, "unbindAllArrive"), t(a, e, "unbindAllLeave"), e;
+
+                  function d() {
+                      this._eventsBucket = [], this._beforeAdding = null, this._beforeRemoving = null
+                  }
+              }(window, "undefined" == typeof jQuery ? null : jQuery, void 0)),
+              products = {},
+              setCss = function(e, t) {
+                  for (css in t) {
+                      var n = t[css].toString().split("!");
+                      n[1] ? e.style.setProperty(css, n[0], n[1]) : e.style[css] = n[0]
+                  }
+              },
+              getUrlParams = function() {
+                  var e = new URLSearchParams(document.location.search),
+                      n = {};
+                  return e.forEach(function(e, t) {
+                      n[t] = e
+                  }), n
+              },
+              urlParams = getUrlParams(),
+              isPreview = ("true" === urlParams["svm-preview"] && sessionStorage.setItem("svm-preview", !0), sessionStorage.getItem("svm-preview")),
+              searchParent = (isPreview && (previewIndicator = document.createElement("div"), setCss(previewIndicator, {
+                  position: "fixed",
+                  top: "-8px",
+                  left: "50%",
+                  transform: "translate(-50%,0)",
+                  zIndex: 9999999999,
+                  padding: "1rem 1.4rem",
+                  boxShadow: "0 0 30px rgba(0,0,0,0.1)",
+                  backgroundColor: "rgba(255,255,255,0.9)",
+                  fontSize: "12px",
+                  border: "1px solid #E43D6F",
+                  borderRadius: "3px",
+                  textAlign: "center"
+              }), p = document.createElement("p"), button = document.createElement("a"), p.innerHTML = "This preview is only visible to you. ", (note = document.createElement("small")).innerHTML = "(Note: Draft and archived products cannot be previewed.)", setCss(note, {
+                  display: "block",
+                  color: "#505050",
+                  fontSize: "11px",
+                  marginTop: "5px"
+              }), setCss(p, {
+                  textAlign: "center",
+                  color: "black",
+                  padding: "5px",
+                  margin: 0,
+                  fontSize: "14px",
+                  fontFamily: "sans-serif"
+              }), setCss(button, {
+                  display: "inline-block",
+                  borderRadius: "8px",
+                  backgroundColor: "#E43D6F",
+                  color: "white",
+                  padding: "1rem 1.4rem",
+                  margin: "0.3rem auto",
+                  fontWeight: "bold",
+                  textDecoration: "none"
+              }), button.innerHTML = "Exit preview", button.setAttribute("href", "#"), button.onclick = function(e) {
+                  sessionStorage.removeItem("svm-preview");
+                  const t = new URLSearchParams(document.location.search);
+                  return t.delete("svm-preview"), window.location.search = t.toString(), !1
+              }, previewIndicator.append(p), previewIndicator.append(button), previewIndicator.append(note), "loading" !== document.readyState ? document.body.append(previewIndicator) : document.addEventListener("DOMContentLoaded", function() {
+                  document.body.append(previewIndicator)
+              })), function(e, t, n) {
+                  var o = 0,
+                      i = e.querySelectorAll(t);
+                  if (null === e.parentNode) return !1;
+                  if (i && 0 === i.length) {
+                      for (; o < 8 && e.parentNode && "SECTION" !== e.parentNode.nodeName && (!e.parentNode.classList || !e.parentNode.classList.contains("shopify-section")) && 0 === e.parentNode.querySelectorAll(t).length && e.parentNode !== document;) e = e.parentNode, o++;
+                      i = !!e.parentNode && (n ? e : e.parentNode.querySelectorAll(t))
+                  }
+                  return i
+              });
+          const B = e => {
+              if (!options.limit || !options.limit.cardNodeSelector || typeof options.limit.dropNeighbours === UNDEFINED) return !1;
+              var e = searchParent(e, options.limit.cardNodeSelector, !0);
+              return e ? (e = [...e.parentElement.children].indexOf(e), !(typeof lastInsertedIndex === UNDEFINED || e > lastInsertedIndex + options.limit.dropNeighbours) || (lastInsertedIndex = e, !1)) : void 0
+          };
+          var videos = [];
+          let k = Object.keys(storedProducts).reduce(function(e, t) {
+              t = storedProducts[t];
+              return e[t[0]] = {
+                  gid: t[2],
+                  scr: t[1],
+                  handle: t[0],
+                  resolution: t[3]
+              }, e
+          }, {});
+          var domArrived = function(a) {
+                  if (!a.classList.contains("wl-bar-image-container") && !isProductPage && a.tagName && "SCRIPT" !== a.tagName && "VIDEO" !== a.tagName) {
+                      var d, t = decodeURIComponent(a.getAttribute("href"));
+                      for (i in window.addEventListener("scroll", function() {
+                              loadVideos(videos)
+                          }), storedProducts) {
+                          const g = i;
+                          var n = storedProducts[g];
+                          let o = n[0],
+                              e = (products[o] = n[1], [t.indexOf("/products/" + o), t.indexOf("?"), t.indexOf("#")]);
+                          var i, s = null,
+                              r = searchParent(a, ".card-wrapper"),
+                              r = 0 < r.length && 0 != r[0].querySelectorAll(".card--outline img").length,
+                              l = a.nextElementSibling,
+                              c = l && l.nextElementSibling,
+                              p = 'img[src*="/products/"], img[srcset*="/products/"], img[data-srcset*="/products/"], img[data-src*="/products/"], *[data-bgset*="/products/"], .product-image[style*="background-image"]',
+                              u = (options.additionalImageSelectors && (p += "," + options.additionalImageSelectors), options.imageSelectors && (p = options.imageSelectors), a.querySelectorAll(p));
+                          if ((0 < (u = 0 === u.length ? searchParent(a, p) : u).length || l && 0 !== l.getElementsByTagName("img").length || c && 0 !== a.nextElementSibling.nextElementSibling.getElementsByTagName("img").length || r || options.customInsertion) && (l = void 0, t.charAt(e[0] + o.length + 10), l = e[0] + "/products/".length, t.substring(l, l + o.length) === o) && 0 === searchParent(a, 'ul[x-ref="navigation"]').length) {
+                              if (s = a, options.customInsertion && !k[o].inserted && !k[o].found) {
+                                  const h = function() {
+                                      options.customInsertion.style?.video && setCss(e.node, options.customInsertion.style.video), options.customInsertion.style?.videoParent && setCss(e.node.parentNode, options.customInsertion.style.videoParent)
+                                  };
+                                  let e;
+                                  const f = Video,
+                                      v = function() {
+                                          return (e = new f(o, products[o])).setCSS({
+                                              position: "absolute",
+                                              top: 0,
+                                              left: 0,
+                                              objectFit: "cover",
+                                              width: "100%",
+                                              minHeight: "100%"
+                                          }), videos.push(e), e
+                                      };
+                                  let n = k[o].found;
+                                  const b = checkNodeRemoval;
+                                  if (options.customInsertion.closest) {
+                                      const y = searchParent(a, options.customInsertion.closest);
+                                      if (y && 0 < y.length && !n) {
+                                          if (B(y[0])) return;
+                                          if (options.customInsertion.waitForNode) {
+                                              const w = shift;
+                                              y[0].arrive(options.customInsertion.waitForNode, {
+                                                  existing: !0
+                                              }, function(e) {
+                                                  const t = options.customInsertion.shift ? w(e, options.customInsertion.shift) : e;
+                                                  t.appendChild(v().node), h(), b(a).then(() => {
+                                                      k[o].inserted = !1, k[o].found = !1
+                                                  }), k[o].inserted = !0
+                                              })
+                                          } else k[o].inserted = !0, y[0].appendChild(v().node), h(), b(y[0]).then(() => {
+                                              k[o].inserted = !1, k[o].found = !1
+                                          });
+                                          k[o].found = !0
+                                      }
+                                  } else if (options.customInsertion.waitForNode) {
+                                      const E = shift;
+                                      a.arrive(options.customInsertion.waitForNode, {
+                                          existing: !0
+                                      }, function(e) {
+                                          if (!B(e) && !n) {
+                                              if (options.customInsertion.style) {
+                                                  const t = options.customInsertion.shift ? E(e, options.customInsertion.shift) : e;
+                                                  t.appendChild(v().node), h(), k[o].inserted = !0, b(t).then(() => {
+                                                      k[o].inserted = !1, k[o].found = !1
+                                                  })
+                                              }
+                                              k[o].found = !0
+                                          }
+                                      })
+                                  }
+                                  return void n
+                              }
+                              var c = -1 !== t.indexOf("?") ? t.split("?")[1] : "",
+                                  r = new URLSearchParams(c);
+                              r.set("splt", !0), a.setAttribute("href", t + "?" + r.toString())
+                          }
+                          n[2] && (c = (l = n[2].split("/"))[l.length - 1], n[3], 0 === (r = document.querySelectorAll('deferred-media[data-media-id="' + c + '"],a[data-thumbnail-id="product-template-' + c + '"]')).length && (p = "#ProductThumbs-" + (i = (l = g.split("/"))[l.length - 1]) + " .product__thumb-" + i, 0 < (r = document.querySelectorAll(p + " .product__thumb-icon")).length && (r = searchParent(r[0], p))), 0 < r.length && setCss(r[0], {
+                              display: "none"
+                          })), isProductPage || !s || s.getAttribute("svm-found") || k[o].found || (k[o].found = !0, d = s)
+                      }
+                      if (d) {
+                          var m, e = d.getAttribute("href");
+                          let r = productNameFromUri(e);
+                          products[r] && (m = products[r], u.forEach(function(e, t) {
+                              var n, o, i, s;
+                              k[r].inserted || B(e) || (n = e.parentElement, setCss(d, {
+                                  animation: "none"
+                              }), checkNodeRemoval(n).then(() => {
+                                  k[r].inserted = !1, k[r].found = !1, a.classList.remove("wl-bar-image-container")
+                              }), e.classList.contains("product-image-alternate") ? e.remove() : n.classList.contains("grid-product__secondary-image") || e.classList.contains("ProductItem__Image--alternate") || ("1" === e.getAttribute("alt") ? (setCss(e, {
+                                  display: "none"
+                              }), setCss(searchParent(e, ".media--hover-effect")[0], {
+                                  paddingBottom: "0"
+                              })) : ((s = searchParent(e, ".box-ratio")) && 0 < s.length && setCss(s[0], {
+                                  height: "auto"
+                              }), (s = searchParent(e, ".grid-link__image--loading")[0]) && s.classList.remove("grid-link__image--loading"), s = k[r].resolution || [600, 600], o = document.createElement("div"), i = options.style && options.style.videoContainer || {}, setCss(o, {
+                                  width: "100%",
+                                  position: i.position || "relative",
+                                  paddingBottom: i["padding-bottom"] || 100 * s[1] / s[0] + "%",
+                                  transform: "none",
+                                  left: 0,
+                                  top: 0,
+                                  zIndex: 9999,
+                                  opacity: 1
+                              }), n.parentNode && n.parentNode.nextElementSibling && n.parentNode.nextElementSibling.classList.contains("card__badge") && setCss(n.parentNode.nextElementSibling, {
+                                  zIndex: 10
+                              }), "AspectRatio AspectRatio--square" !== n.classList.value && !n.classList.contains("grid__image-ratio--square") || setCss(o, {
+                                  marginTop: "-100%"
+                              }), "PrShopifyTheme/associate" === Shopify.theme.name && "aspect-ratio aspect-ratio--square" === n.classList.value && setCss(o, {
+                                  marginBottom: "-100%"
+                              }), "100%" === n.style.paddingBottom && setCss(n, {
+                                  paddingBottom: 0
+                              }), (i = searchParent(e, ".o-ratio")) && 0 < i.length && (setCss(i[0], {
+                                  padding: 0
+                              }), i[0].querySelectorAll("img.product-card__img").forEach(function(e) {
+                                  e.remove()
+                              })), (s = searchParent(e, ".product-block__image--show-on-hover")) && 0 < s.length && (setCss(s[0], {
+                                  opacity: 1
+                              }), 0 < (s = s[0].parentElement.querySelectorAll(".product-block__image--secondary")).length && s.forEach(function(e) {
+                                  setCss(e, {
+                                      display: "none"
+                                  })
+                              })), (i = searchParent(e, ".aspect-ratio--short")) && 0 < i.length && setCss(i[0], {
+                                  padding: "0!important"
+                              }), options.style && options.style.videoContainer || (setTimeout(function() {
+                                  var e = window.getComputedStyle(o, ":before").getPropertyValue("padding-bottom"),
+                                      e = (0 < parseInt(e) && setCss(o, {
+                                          paddingBottom: 0
+                                      }), window.getComputedStyle(n, ":before").getPropertyValue("padding-bottom"));
+                                  0 < parseInt(e) && setCss(o, {
+                                      marginTop: "-" + e
+                                  })
+                              }, 0), e.getAttribute("class") && o.setAttribute("class", e.getAttribute("class"))), (-1 !== n.style.paddingTop.indexOf("%") && 0 <= parseInt(n.style.paddingTop) || -1 !== n.style.paddingBottom.indexOf("%") && 0 <= parseInt(n.style.paddingBottom)) && setCss(n, {
+                                  paddingTop: 0,
+                                  paddingBottom: n.classList.contains("product-item__image-wrapper") ? "100%" : "0",
+                                  animation: "none",
+                                  opacity: 1,
+                                  zIndex: 0
+                              }), n.classList.contains("lazy-image--background") && (setCss(n, {
+                                  height: "auto!important"
+                              }), setCss(n.parentNode, {
+                                  maxWidth: "none",
+                                  maxHeight: "none",
+                                  padding: 0
+                              })), -1 != d.style.paddingTop.indexOf("%") && 0 <= parseInt(d.style.paddingTop) && setCss(d, {
+                                  paddingTop: 0,
+                                  animation: "none"
+                              }), (s = n.querySelector(".card__preloader")) && s.remove(), o.onclick = function() {
+                                  window.location = a.getAttribute("href")
+                              }, (s = (i = new Video(r, m)).node).setAttribute("id", "svm-video-" + r + "-" + t), s.classList.add("svm-video"), s.setAttribute("width", n.clientWidth + "px"), s.setAttribute("height", n.clientHeight + "px"), i.setCSS({
+                                  position: "absolute",
+                                  left: "0",
+                                  top: "0",
+                                  width: "100%",
+                                  minHeight: "100%",
+                                  maxHeight: "100%",
+                                  clipPath: "inset(1px 1px)"
+                              }), options.style && options.style.videoContainer && setCss(o, options.style.videoContainer), options.style && options.style.link && setCss(d, options.style.link), options.style && options.style.video && setCss(s, options.style.video), !1 !== options.features?.hideOriginalImage && setCss(e, {
+                                  display: "none!important"
+                              }), i.onLoadedData = function() {
+                                  setCss(o, {
+                                      display: options.style && options.style.videoContainer && options.style.videoContainer.display || "block",
+                                      cursor: "pointer"
+                                  }), n.classList.contains("image-wrap") && setCss(n, {
+                                      height: "auto",
+                                      paddingBottom: "0",
+                                      opacity: "1"
+                                  })
+                              }, o.append(s), n.insertBefore(o, e), s.play(), options.style && options.style.videoContainerParent && setCss(o.parentNode, options.style.videoContainerParent), setCss(n, {
+                                  position: "" === (!n.style.position || n.style.position) ? n.style.position : "relative"
+                              }), options.style && options.style.videoContainer && setCss(o, options.style.videoContainer), options.style && options.style.link && setCss(d, options.style.link), options.style && options.style.video && setCss(s, options.style.video), videos.push({
+                                  loaded: !1,
+                                  node: s,
+                                  img: e
+                              }), k[r].inserted = !0)))
+                          }))
+                      }
+                  }
+              },
+              container = document.documentElement || document.body;
+          let e = !1;
+          if ((!options || !0 !== options.suspended || isPreview || -1 !== location.search.indexOf("svm-forceEnable")) && (!options.disabledPages || -1 === options.disabledPages.indexOf(pageType))) {
+              const r1 = function() {
+                  e = !0, document.arrive(options.linkSelector || 'a[href*="/products/"]:not(.navigation *)', {
+                      existing: !0
+                  }, function() {
+                      var e;
+                      this && (0 < (e = this.querySelectorAll("video")).length && -1 !== e[0].id.indexOf("svm-video") && (e = e[0], setCss(e, {
+                          display: options.style && options.style.video && options.style.video.display || "block"
+                      }), e.muted = "true", e.play()), domArrived(this))
+                  })
+              }; - 1 < options.otherExtensions?.indexOf("globo") ? window.addEventListener("globoFilterRenderCompleted", function() {
+                  e || r1()
+              }) : e || r1();
+              var addCssRule = function(e) {
+                  if (0 < e.length) {
+                      const t = document.createElement("style"),
+                          n = (t.setAttribute("app-name", "spotlight-video-machine"), t.type = "text/css", document.head || document.getElementsByTagName("head")[0]);
+                      n.appendChild(t), t.styleSheet ? t.styleSheet.cssText = e : t.appendChild(document.createTextNode(e))
+                  }
+              };
+              addCssRule("video.svm-video::-webkit-media-controls{display: none;-webkit-appearance: none;}")
+          }
+      }
+  })();

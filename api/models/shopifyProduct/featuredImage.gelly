@@ -1,0 +1,6 @@
+field on shopifyProduct {
+  images {
+    source
+    [where position == 1]
+  }
+}
