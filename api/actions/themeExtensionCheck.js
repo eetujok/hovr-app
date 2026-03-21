@@ -19,7 +19,7 @@ export const params = {
 
 export async function run({ params, logger, api, connections }) {
   
-  const themeType = await api.shopifyTheme.findMany({
+  const themes = await api.shopifyTheme.findMany({
       filter: {
         shopId: { equals: params.shopId }
       },
@@ -29,33 +29,48 @@ export async function run({ params, logger, api, connections }) {
       }
   })
 
-  const mainTheme = themeType.find(theme => theme.role === 'main' || theme.role === 'development')
+  const shopifyClient = await connections.shopify.forShopId(params.shopId)
 
-  
-  if (mainTheme && mainTheme.id && mainTheme.role) {
+  var hasPreviewVideoBlock = false
+  var hasHovrAutoplay = false
 
-    try {
-      const assetResponse = await shopify.asset.get(
-        mainTheme.id,
-        {
-          asset: {
-            "key": "config/settings_data.json"
+  // Organize themes to check main theme first, then others
+  const mainThemes = themes.filter(theme => theme && theme.role === 'main');
+  const otherThemes = themes.filter(theme => theme && theme.role !== 'main');
+  const sortedThemes = [...mainThemes, ...otherThemes];
+
+  for (const theme of sortedThemes) {
+
+    if (theme && theme.id && theme.role) {
+      try {
+        const themeRoleLowercase = theme.role.toLowerCase()
+        if (themeRoleLowercase === 'main' || themeRoleLowercase === 'development' || themeRoleLowercase === 'unpublished') {
+          const assetResponse = await shopifyClient.asset.get(
+            theme.id,
+            {
+              asset: {
+                "key": "config/settings_data.json"
+              }
+            }
+          );
+    
+          const themeStatus = assetResponse.value.includes("hovr-video-on-hover");
+          const autoplayStatus = assetResponse.value.includes(`"hovr_autoplay": true`);
+
+          if (themeStatus) {
+            hasPreviewVideoBlock = true
+            if (autoplayStatus) {
+              hasHovrAutoplay = true
+            }
+            break
           }
         }
-      );
-
-      logger.info(assetResponse, "Asset response");
-
-      const themeStatus = assetResponse.value.includes("previewVideoBlock");
-
-      return { data: themeStatus };
-      
-    } catch (error) {
-      logger.error(error, "Error fetching asset. Returning true as fallback.");
-      return { data: true };
-    }
+      } catch (error) {
+        logger.error("Error fetching theme asset. Returning true as fallback.");
+      }
+      }
   }
-  
-  return { data: false }
+
+  return { data: hasPreviewVideoBlock, autoplay: hasHovrAutoplay }
   
 };

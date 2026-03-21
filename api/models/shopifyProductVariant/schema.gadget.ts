@@ -9,6 +9,7 @@ export const schema: GadgetModel = {
   fields: {},
   shopify: {
     fields: [
+      "availableForSale",
       "barcode",
       "compareAtPrice",
       "inventoryPolicy",
@@ -21,7 +22,6 @@ export const schema: GadgetModel = {
       "presentmentPrices",
       "price",
       "product",
-      "productImage",
       "selectedOptions",
       "shop",
       "shopifyCreatedAt",

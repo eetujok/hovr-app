@@ -9,11 +9,20 @@ export const schema: GadgetModel = {
   fields: {
     batchUrl: { type: "string", storageKey: "mkcQsBvs5FKx" },
     bunnyGUID: { type: "string", storageKey: "mttgsE63B5XL" },
+    fileId: { type: "string", storageKey: "Cd7OfuroZSIF" },
+    options: {
+      type: "enum",
+      acceptMultipleSelections: false,
+      acceptUnlistedOptions: false,
+      options: ["PRODUCTPAGE", "COLLECTION", "BOTH"],
+      storageKey: "zclMwCtMQ6F2",
+    },
     product: {
       type: "belongsTo",
       parent: { model: "shopifyProduct" },
       storageKey: "LnaQowV39BuW",
     },
+    src: { type: "string", storageKey: "V5NdQBFrhazn" },
     status: {
       type: "enum",
       default: "none",
@@ -28,10 +37,22 @@ export const schema: GadgetModel = {
       ],
       storageKey: "o2UJ-dkLeHYf",
     },
+    syncVideo: {
+      type: "boolean",
+      default: false,
+      storageKey: "4u67XyhCQAGg",
+    },
     thumbnail: {
       type: "file",
       allowPublicAccess: false,
       storageKey: "FK9q_xHfSmID",
+    },
+    type: {
+      type: "enum",
+      acceptMultipleSelections: false,
+      acceptUnlistedOptions: false,
+      options: ["AUTOPLAY", "HOVER"],
+      storageKey: "GRpQa8mCnP5o",
     },
     video: {
       type: "file",

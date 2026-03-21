@@ -7,15 +7,15 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v1",
   storageKey: "DataModel-Shopify-Product",
   fields: {
-    featuredImage: {
-      type: "computed",
-      sourceFile: "api/models/shopifyProduct/featuredImage.gelly",
-      storageKey: "CvQYRRemBMpU",
-    },
     productVideos: {
       type: "hasOne",
       child: { model: "productVideos", belongsToField: "product" },
       storageKey: "Rb0QgLmONCSr",
+    },
+    sliderVideo: {
+      type: "belongsTo",
+      parent: { model: "sliderVideo" },
+      storageKey: "FMyB15dntIpw",
     },
     videoSet: {
       type: "boolean",
@@ -28,8 +28,8 @@ export const schema: GadgetModel = {
       "body",
       "category",
       "compareAtPriceRange",
+      "featuredMedia",
       "handle",
-      "images",
       "media",
       "productCategory",
       "productType",

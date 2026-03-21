@@ -6,12 +6,20 @@ import type { GadgetModel } from "gadget-server";
 export const schema: GadgetModel = {
   type: "gadget/model-schema/v1",
   storageKey: "DataModel-Shopify-Theme",
-  fields: {},
+  fields: {
+    roleBackup: {
+      type: "string",
+      storageKey:
+        "ModelField-DataModel-Shopify-Theme-role::FieldStorageEpoch-DataModel-Shopify-Theme-role-initial",
+    },
+  },
   shopify: {
     fields: [
       "name",
+      "prefix",
       "previewable",
       "processing",
+      "processingFailed",
       "role",
       "shop",
       "shopifyCreatedAt",

@@ -13,11 +13,16 @@ export async function run({ params, record, logger, api, connections }) {
  * @param { UpdateShopifyProductActionContext } context
  */
 export async function onSuccess({ params, record, logger, api, connections }) {
-  // Your logic goes here
+
 };
 
 /** @type { ActionOptions } */
 export const options = {
   actionType: "update",
-  triggers: { api: true },
+  triggers: {
+    api: true,
+    shopify: { 
+      includeFields: ["id", "title", "handle", "featuredMedia", "media"]  
+    },
+  },
 };

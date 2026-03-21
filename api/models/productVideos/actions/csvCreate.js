@@ -7,6 +7,11 @@ import { bufferToStream, createVideoInBunnyCDN, uploadVideoInBunnyCDN } from "..
  */
 export async function run({ params, record, logger, api, connections }) {
   applyParams(params, record);
+  
+  // Set videoType to HOVER and videoOptions to COLLECTION for all CSV uploads
+  record.type = "HOVER";
+  record.options = "COLLECTION";
+  
   await save(record);
 };
 
@@ -18,29 +23,40 @@ export async function onSuccess({params, record, logger, api, connections}) {
   
   logger.info(productResponse, "Product videoSet to true")
   
-  async function fetchVideo(url) {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch video: ${response.statusText}`);
-        }
-        return await response.buffer(); 
-  }
+  // Get the shop connection for the product
+  const product = await api.shopifyProduct.findOne(record.productId, {
+    select: {
+      id: true,
+      shopId: true
+    }
+  });
 
-    const url = record.batchUrl
-    const videoBuffer = await fetchVideo(url)
-    const videoStream = bufferToStream(videoBuffer);
-    const videoGuid = await createVideoInBunnyCDN(record.productId);
-    const updateResponse = await api.productVideos.update(record.id, {
-      bunnyGUID: videoGuid,
-      status: "uploading"
-    })
-    
-  const uploadResponse = await uploadVideoInBunnyCDN(videoStream, videoGuid);
+
+  const url = record.batchUrl
+
   
-  
+  // Enqueue the pollVideo action to handle all video processing
+  await api.enqueue(
+    api.pollVideo,
+    {
+      productId: record.productId,
+      recordId: record.id,
+      videoUrl: url,
+      shopId: product.shopId,
+      videoType: record.type,
+      videoOptions: record.options
+    },
+    {
+      queue: "videoProcessingQueue",
+      maxConcurrency: 5
+    }
+  );
+
+  logger.info("Enqueued pollVideo action to handle video processing");
 }
 
 /** @type { ActionOptions } */
 export const options = {
   actionType: "create",
+  timeoutMS: 600000,
 };

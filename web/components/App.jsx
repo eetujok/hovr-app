@@ -22,6 +22,10 @@ import AddVideoPage from "../routes/addVideo"
 import UploadVideoPage from "../routes/uploadVideo"
 import PlansPage from "../routes/plans";
 import AdminUploadVideo from "../routes/adminUploadVideo"
+import ChooseVideoPage from "../routes/chooseVideo"
+import VideoBannerPage from "../routes/videoBanner"
+import VideoFeedsPage from "../routes/videoFeeds"
+import CreateVideoFeedPage from "../routes/createVideoFeed"
 
 import { api } from "../api";
 import { MantleProvider } from "@heymantle/react";
@@ -45,15 +49,19 @@ function Error404() {
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Index />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="*" element={<Error404 />} />
-        <Route path="/add-video" element={<AddVideoPage />} />
-        <Route path="/upload-video" element={<UploadVideoPage />} />
-        <Route path="/plans" element={<PlansPage />} />
-        <Route path="/admin-upload-video" element={<AdminUploadVideo />} />
-      </Route>
+              <Route path="/" element={<Layout />}>
+          <Route index element={<Index />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<Error404 />} />
+          <Route path="/add-video" element={<AddVideoPage />} />
+          <Route path="/upload-video" element={<UploadVideoPage />} />
+          <Route path="/plans" element={<PlansPage />} />
+          <Route path="/admin-upload-video" element={<AdminUploadVideo />} />
+          <Route path="/choose-video" element={<ChooseVideoPage />} />
+          <Route path="/video-banner" element={<VideoBannerPage />} />
+          <Route path="/video-feeds" element={<VideoFeedsPage />} />
+          <Route path="/create-video-feed" element={<CreateVideoFeedPage />} />
+        </Route>
     )
   );
 
@@ -125,6 +133,7 @@ function EmbeddedApp() {
       <Outlet />
       <NavMenu>
         <Link to="/" rel="home">Shop Information</Link>
+        <Link to="/video-feeds" rel="video-feeds">Video Feeds</Link>
         <Link to="/plans" rel="plans">Select plan</Link>
       </NavMenu>
     </MantleProvider>

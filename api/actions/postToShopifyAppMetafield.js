@@ -14,7 +14,9 @@ export const params = {
       "id": { type: "string" },
       "streamLink": { type: "string" },
       "srcImage": { type: "string"},
-      "handle": {type: "string"}
+      "handle": {type: "string"},
+      "videoType": {type: "string"},
+      "options": {type: "string"}
     }
   }
   

@@ -2,7 +2,7 @@ import { DropZone, BlockStack, Thumbnail, Text, Banner, Icon } from '@shopify/po
 import { NoteIcon } from '@shopify/polaris-icons';
 import { useState, useCallback } from 'react';
 
-const VideoDropZone = ({ onFileUpload }) => {
+const VideoDropZone = ({ onFileUpload, disabled = false, optionsError = '' }) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
 
@@ -11,11 +11,11 @@ const VideoDropZone = ({ onFileUpload }) => {
   
   const handleDropZoneDrop = useCallback(
     (_dropFiles, acceptedFiles, rejectedFiles) => {
+      if (disabled) return;
 
       const uploadedFile = acceptedFiles[0];
 
       if (acceptedFiles.length > 0 && validImageTypes.includes(acceptedFiles[0].type)) {
-
         if (uploadedFile.size > MAX_FILE_SIZE) {
           setFile(null);
           setError('File size must be under 100MB.');
@@ -31,7 +31,7 @@ const VideoDropZone = ({ onFileUpload }) => {
         onFileUpload(null);
       }
     },
-    [onFileUpload],
+    [onFileUpload, disabled],
   );
 
   const fileUpload = !file && <DropZone.FileUpload actionHint="Accepts .mp4. Video size has to be under 100mb." />;
@@ -57,15 +57,22 @@ const VideoDropZone = ({ onFileUpload }) => {
   );
 
   return (
-    <DropZone allowMultiple={false} onDrop={handleDropZoneDrop}>
-      {error && (
+    <>
+      {optionsError && (
         <Banner status="critical">
-          <p>{error}</p>
+          <p>{optionsError}</p>
         </Banner>
       )}
-      {uploadedFile}
-      {fileUpload}
-    </DropZone>
+      <DropZone allowMultiple={false} onDrop={handleDropZoneDrop} disabled={disabled}>
+        {error && (
+          <Banner status="critical">
+            <p>{error}</p>
+          </Banner>
+        )}
+        {uploadedFile}
+        {fileUpload}
+      </DropZone>
+    </>
   );
 }
 

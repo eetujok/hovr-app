@@ -35,7 +35,7 @@ export default function () {
                       <Text as="h1" variant="headingXl">Activate 14 day trial ⭐️</Text>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2em' }}>
-                      <Text as="h2" alignment='center' variant="bodyLg">Select a plan to activate video hovers in your theme. Don't worry you won't be charged anything yet.</Text>
+                      <Text as="h2" alignment='center' variant="bodyLg">Select a plan to add video sections and/or activate autoplay videos & video hovers in your theme. Don't worry <b>you won't be charged anything yet.</b></Text>
                     </div>
                   </div>
                 )}

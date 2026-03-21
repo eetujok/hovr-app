@@ -23,15 +23,13 @@ const VideoIndexTable = ({ navigate, shouldRefetch }) => {
       id: true,
       status: true,
       createdAt: true,
+      type: true,
       product: {
         title: true,
-        images: {
-          edges: {
-            node: {
-              position: true,
-              source: true,
-            },
-          },
+        featuredMedia: {
+          file: {
+            image: true
+          }
         },
       },
     },
@@ -68,12 +66,15 @@ const VideoIndexTable = ({ navigate, shouldRefetch }) => {
   };
 
   const videoStatusBadge = {
-
     "active": <Badge size="large" tone="success-strong">Active</Badge>,
     "uploading": <Badge size="large" tone="info">Uploading</Badge>,
     "uploadFailed": <Badge size="large" tone="critical-strong">Uploading</Badge>,
     "encoding": <Badge size="large" tone="success">Encoding</Badge>
+  }
 
+  const videoTypeBadge = {
+    "AUTOPLAY": <Badge size="large" tone="info">Autoplay</Badge>,
+    "HOVER": <Badge size="large" tone="attention">Hover</Badge>
   }
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(videos);
@@ -87,7 +88,7 @@ const VideoIndexTable = ({ navigate, shouldRefetch }) => {
     >
       <IndexTable.Cell>
         <img
-          src={video?.product?.images?.edges[0]?.node.source}
+          src={video?.product?.featuredMedia?.file?.image?.originalSrc}
           alt={`Video thumbnail for ${video?.product?.title}`}
           style={{ width: 50, height: 50 }}
         />
@@ -99,6 +100,9 @@ const VideoIndexTable = ({ navigate, shouldRefetch }) => {
       </IndexTable.Cell>
       <IndexTable.Cell>
         { videoStatusBadge[video.status] || <Badge status="default">Unknown</Badge>}
+      </IndexTable.Cell>
+      <IndexTable.Cell>
+        { videoTypeBadge[video.type] || <Badge size="large" tone="attention">Hover</Badge>}
       </IndexTable.Cell>
       <IndexTable.Cell>
         {video.createdAt.toISOString().split('T')[0]}
@@ -152,8 +156,8 @@ const VideoIndexTable = ({ navigate, shouldRefetch }) => {
           { title: '' },
           { title: 'Product with video' },
           { title: 'Status' },
+          { title: 'Video type' },
           { title: 'Uploaded at' },
-
         ]}
         promotedBulkActions={promotedBulkActions}
         pagination={{

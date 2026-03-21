@@ -23,9 +23,25 @@ export const permissions: GadgetPermissions = {
             update: true,
           },
         },
+        shopifyAppSubscription: {
+          read: {
+            filter:
+              "accessControl/filters/shopify/shopifyAppSubscription.gelly",
+          },
+          actions: {
+            create: true,
+            delete: true,
+            update: true,
+          },
+        },
         shopifyFile: {
           read: {
             filter: "accessControl/filters/shopify/shopifyFile.gelly",
+          },
+          actions: {
+            create: true,
+            delete: true,
+            update: true,
           },
         },
         shopifyGdprRequest: {
@@ -42,12 +58,6 @@ export const permissions: GadgetPermissions = {
           read: {
             filter:
               "accessControl/filters/shopify/shopifyProduct.gelly",
-          },
-        },
-        shopifyProductImage: {
-          read: {
-            filter:
-              "accessControl/filters/shopify/shopifyProductImage.gelly",
           },
         },
         shopifyProductMedia: {
@@ -98,8 +108,27 @@ export const permissions: GadgetPermissions = {
               "accessControl/filters/shopify/shopifyTheme.gelly",
           },
         },
+        sliderVideo: {
+          read: true,
+          actions: {
+            create: true,
+            createFromFile: true,
+            delete: true,
+            update: true,
+          },
+        },
+        videoFeed: {
+          read: true,
+          actions: {
+            create: true,
+            delete: true,
+            update: true,
+          },
+        },
       },
       actions: {
+        disableSyncProductVideos: true,
+        syncProductVideos: true,
         themeExtensionCheck: true,
       },
     },

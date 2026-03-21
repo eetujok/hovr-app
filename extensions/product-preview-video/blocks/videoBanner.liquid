@@ -1,0 +1,759 @@
+
+
+<style>
+    /* Apply padding to the video banner app block */
+    .shopify-app-block[data-block-handle="videoBanner"] {
+        padding: {{ block.settings.theme_banner_top_padding | default: 0 }}px 0 {{ block.settings.theme_banner_bottom_padding | default: 0 }}px 0 !important;
+    }
+    
+    @media screen and (max-width: 768px) {
+        .shopify-app-block[data-block-handle="videoBanner"] {
+            padding: {{ block.settings.theme_banner_top_padding | default: 0 | times: 0.8 }}px 0 {{ block.settings.theme_banner_bottom_padding | default: 0 | times: 0.8 }}px 0 !important;
+        }
+    }
+    
+    {% unless block.settings.theme_banner_include_margins %}
+    /* Remove Shopify's default app block margins for this specific block */
+    .shopify-app-block[data-block-handle="videoBanner"] {
+        margin: 0 !important;
+    }
+    
+    .shopify-app-block[data-block-handle="videoBanner"] .page-width {
+        margin: 0 !important;
+        max-width: none !important;
+        padding: 0 !important;
+    }
+    
+    /* Target the outermost page-width div that contains our app block */
+    .page-width:has(.shopify-app-block[data-block-handle="videoBanner"]) {
+        margin: 0 !important;
+        max-width: none !important;
+        padding: 0 !important;
+    }
+    {% endunless %}
+    
+    .hovr-video-banner {
+        position: relative;
+        width: 100%;
+        height: {{ block.settings.theme_banner_video_height_desktop | default: 50 }}vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .hovr-video-banner--clickable {
+        cursor: pointer;
+    }
+    
+    .hovr-video-banner--clickable .hovr-video-banner__video-desktop,
+    .hovr-video-banner--clickable .hovr-video-banner__video-mobile {
+        cursor: pointer;
+    }
+    
+    .hovr-video-banner__video-desktop,
+    .hovr-video-banner__video-mobile {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        opacity: {{ block.settings.theme_banner_video_opacity | default: 1 | divided_by: 100.0 }}
+    }
+    
+    .hovr-video-banner__video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .hovr-video-banner__video-mobile {
+        display: none;
+    }
+    
+    .hovr-video-banner__placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
+    
+    .hovr-video-banner__placeholder svg {
+        width: 80px;
+        height: 80px;
+        opacity: 0.6;
+        color: white;
+    }
+    
+    .hovr-video-banner__sound-toggle {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.5);
+        border: none;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+    }
+    
+    .hovr-video-banner__sound-toggle:hover {
+        background: rgba(0, 0, 0, 0.7);
+        transform: scale(1.1);
+    }
+    
+    .hovr-video-banner__sound-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .hovr-video-banner__sound-icon--unmuted {
+        display: none;
+    }
+    
+    .hovr-video-banner__sound-toggle.unmuted .hovr-video-banner__sound-icon--muted {
+        display: none;
+    }
+    
+    .hovr-video-banner__sound-toggle.unmuted .hovr-video-banner__sound-icon--unmuted {
+        display: block;
+    }
+    
+    .hovr-video-banner__overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        z-index: 2;
+    }
+    
+    .hovr-video-banner__content {
+        position: absolute;
+        z-index: 3;
+        text-align: {{ block.settings.theme_banner_content_alignment | default: 'center' }};
+        color: {{ block.settings.theme_banner_text_color | default: '#ffffff' }};
+        max-width: {{ block.settings.theme_banner_content_max_width | default: 800 }}px;
+        padding: {{ block.settings.theme_banner_top_padding | default: 0 }}px {{ block.settings.theme_banner_bottom_padding | default: 0 }}px;
+        
+        {% case block.settings.theme_banner_content_position %}
+            {% when 'top-left' %}
+                top: 40px;
+                left: 40px;
+                transform: none;
+            {% when 'top' %}
+                top: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+            {% when 'top-right' %}
+                top: 40px;
+                right: 40px;
+                transform: none;
+            {% when 'middle-left' %}
+                top: 50%;
+                left: 40px;
+                transform: translateY(-50%);
+            {% when 'middle' %}
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            {% when 'middle-right' %}
+                top: 50%;
+                right: 40px;
+                transform: translateY(-50%);
+            {% when 'bottom-left' %}
+                bottom: 40px;
+                left: 40px;
+                transform: none;
+            {% when 'bottom' %}
+                bottom: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+            {% when 'bottom-right' %}
+                bottom: 40px;
+                right: 40px;
+                transform: none;
+            {% else %}
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+        {% endcase %}
+    }
+    
+    .hovr-video-banner__content-inner {
+        margin-bottom: {{ block.settings.theme_banner_content_gap | default: 20 }}px;
+    }
+    
+    .hovr-video-banner__title {
+        font-size: {{ block.settings.theme_banner_title_size | default: 24 }}px;
+        font-weight: 700;
+        margin: 0 0 16px 0;
+        line-height: 1.2;
+        color: {{ block.settings.theme_banner_title_color | default: '#ffffff' }};
+    }
+    
+    .hovr-video-banner__subheading {
+        font-size: {{ block.settings.theme_banner_subheading_size | default: 16 }}px;
+        margin: 0 0 24px 0;
+        line-height: 1.4;
+        opacity: 0.9;
+        color: {{ block.settings.theme_banner_subheading_color | default: '#ffffff' }};
+    }
+    
+    .hovr-video-banner__buttons {
+        display: flex;
+        justify-content: {{ block.settings.theme_banner_content_alignment | default: 'center' }};
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .hovr-video-banner__button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 28px;
+        text-decoration: none;
+        border-radius: {{ block.settings.theme_banner_button_radius | default: 0 }}px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        min-width: 140px;
+        background-color: {{ block.settings.theme_banner_primary_button_color | default: '#000000' }};
+        color: {{ block.settings.theme_banner_primary_button_text_color | default: '#ffffff' }};
+        border-color: {{ block.settings.theme_banner_primary_button_color | default: '#000000' }};
+        cursor: pointer;
+    }
+    
+
+    
+    .hovr-video-banner__secondary-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 28px;
+        text-decoration: none;
+        border-radius: {{ block.settings.theme_banner_button_radius | default: 0 }}px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+        min-width: 140px;
+        background-color: transparent;
+        color: {{ block.settings.theme_banner_secondary_button_text_color | default: '#ffffff' }};
+        border-color: {{ block.settings.theme_banner_secondary_button_text_color | default: '#ffffff' }};
+    }
+    
+    
+    @media screen and (max-width: 768px) {
+        .hovr-video-banner {
+            height: {{ block.settings.theme_banner_video_height_mobile | default: 40 }}vh;
+        }
+        
+        .hovr-video-banner__video-desktop {
+            display: none;
+        }
+        
+        .hovr-video-banner__video-mobile {
+            display: block;
+        }
+        
+        .hovr-video-banner__content {
+            padding: 20px;
+            max-width: calc(100% - 40px);
+        }
+        
+        .hovr-video-banner__title {
+            font-size: {{ block.settings.theme_banner_title_size | default: 24 | times: 0.8 }}px;
+        }
+        
+        .hovr-video-banner__subheading {
+            font-size: {{ block.settings.theme_banner_subheading_size | default: 16 | times: 0.9 }}px;
+        }
+        
+        .hovr-video-banner__buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .hovr-video-banner__button,
+        .hovr-video-banner__secondary-button {
+            width: 100%;
+            max-width: 280px;
+        }
+    }
+    
+    @media screen and (max-width: 480px) {
+        .hovr-video-banner__content {
+            padding: 8px;
+            max-width: calc(100% - 32px);
+        }
+        
+        .hovr-video-banner__title {
+            font-size: {{ block.settings.theme_banner_title_size | default: 24 | times: 0.7 }}px;
+        }
+    }
+</style>
+
+{% if block.settings.theme_banner_custom_css != blank %}
+<style>
+{{ block.settings.theme_banner_custom_css }}
+</style>
+{% endif %}
+   
+<div class="hovr-video-banner{% if block.settings.theme_banner_target_url != blank %} hovr-video-banner--clickable{% endif %}">
+    {% if block.settings.theme_banner_video_desktop %}
+    <div class="hovr-video-banner__video-desktop"{% if block.settings.theme_banner_target_url != blank %} onclick="window.location.href='{{ block.settings.theme_banner_target_url }}'"{% endif %}>
+        {% case block.settings.theme_banner_video_sound %}
+            {% when 'no_audio' %}
+                {{ block.settings.theme_banner_video_desktop | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--desktop', autoplay: true, muted: true, loop: true, playsinline: true }}
+            {% when 'start_muted' %}
+                {{ block.settings.theme_banner_video_desktop | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--desktop', autoplay: true, muted: true, loop: true, playsinline: true }}
+            {% when 'start_unmuted' %}
+                {{ block.settings.theme_banner_video_desktop | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--desktop', autoplay: true, muted: false, loop: true, playsinline: true }}
+            {% else %}
+                {{ block.settings.theme_banner_video_desktop | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--desktop', autoplay: true, muted: true, loop: true, playsinline: true }}
+        {% endcase %}
+    </div>
+    {% endif %}
+    {% if block.settings.theme_banner_video_mobile %}
+    <div class="hovr-video-banner__video-mobile"{% if block.settings.theme_banner_target_url != blank %} onclick="window.location.href='{{ block.settings.theme_banner_target_url }}'"{% endif %}>
+        {% case block.settings.theme_banner_video_sound %}
+            {% when 'no_audio' %}
+                {{ block.settings.theme_banner_video_mobile | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--mobile', autoplay: true, muted: true, loop: true, playsinline: true }}
+            {% when 'start_muted' %}
+                {{ block.settings.theme_banner_video_mobile | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--mobile', autoplay: true, muted: true, loop: true, playsinline: true }}
+            {% when 'start_unmuted' %}
+                {{ block.settings.theme_banner_video_mobile | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--mobile', autoplay: true, muted: false, loop: true, playsinline: true }}
+            {% else %}
+                {{ block.settings.theme_banner_video_mobile | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--mobile', autoplay: true, muted: true, loop: true, playsinline: true }}
+        {% endcase %}
+    </div>
+    {% elsif block.settings.theme_banner_video_desktop %}
+    <div class="hovr-video-banner__video-mobile"{% if block.settings.theme_banner_target_url != blank %} onclick="window.location.href='{{ block.settings.theme_banner_target_url }}'"{% endif %}>
+        {% case block.settings.theme_banner_video_sound %}
+            {% when 'no_audio' %}
+                {{ block.settings.theme_banner_video_desktop | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--mobile', autoplay: true, muted: true, loop: true, playsinline: true }}
+            {% when 'start_muted' %}
+                {{ block.settings.theme_banner_video_desktop | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--mobile', autoplay: true, muted: true, loop: true, playsinline: true }}
+            {% when 'start_unmuted' %}
+                {{ block.settings.theme_banner_video_desktop | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--mobile', autoplay: true, muted: false, loop: true, playsinline: true }}
+            {% else %}
+                {{ block.settings.theme_banner_video_desktop | video_tag: class: 'hovr-video-banner__video hovr-video-banner__video--mobile', autoplay: true, muted: true, loop: true, playsinline: true }}
+        {% endcase %}
+    </div>
+    {% endif %}
+    {% unless block.settings.theme_banner_video_desktop or block.settings.theme_banner_video_mobile %}
+    <div class="hovr-video-banner__placeholder">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+        </svg>
+    </div>
+    {% endunless %}
+    {% unless block.settings.theme_banner_video_sound == 'no_audio' %}
+    <button class="hovr-video-banner__sound-toggle" onclick="toggleVideoSound()">
+        <svg class="hovr-video-banner__sound-icon hovr-video-banner__sound-icon--muted" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+        </svg>
+        <svg class="hovr-video-banner__sound-icon hovr-video-banner__sound-icon--unmuted" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+    </button>
+    {% endunless %}
+    
+    <script>
+        {% unless block.settings.theme_banner_video_sound == 'no_audio' %}
+        function toggleVideoSound() {
+            const visibleVideo = getVisibleVideo();
+            const toggle = document.querySelector('.hovr-video-banner__sound-toggle');
+            
+            if (visibleVideo) {
+                if (visibleVideo.muted) {
+                    visibleVideo.muted = false;
+                    toggle.classList.add('unmuted');
+                } else {
+                    visibleVideo.muted = true;
+                    toggle.classList.remove('unmuted');
+                }
+            }
+        }
+        
+        function getVisibleVideo() {
+            const desktopVideo = document.querySelector('.hovr-video-banner__video--desktop');
+            const mobileVideo = document.querySelector('.hovr-video-banner__video--mobile');
+            
+            // Check if we're on mobile (768px and below)
+            if (window.innerWidth <= 768) {
+                return mobileVideo || desktopVideo; // Fallback to desktop if no mobile video
+            } else {
+                return desktopVideo;
+            }
+        }
+        
+        function muteInvisibleVideos() {
+            const desktopVideo = document.querySelector('.hovr-video-banner__video--desktop');
+            const mobileVideo = document.querySelector('.hovr-video-banner__video--mobile');
+            
+            if (window.innerWidth <= 768) {
+                // On mobile, mute desktop video if it exists
+                if (desktopVideo) {
+                    desktopVideo.muted = true;
+                }
+                // Unmute mobile video if sound setting allows
+                if (mobileVideo && '{{ block.settings.theme_banner_video_sound }}' === 'start_unmuted') {
+                    mobileVideo.muted = false;
+                }
+            } else {
+                // On desktop, mute mobile video if it exists
+                if (mobileVideo) {
+                    mobileVideo.muted = true;
+                }
+                // Unmute desktop video if sound setting allows
+                if (desktopVideo && '{{ block.settings.theme_banner_video_sound }}' === 'start_unmuted') {
+                    desktopVideo.muted = false;
+                }
+            }
+        }
+        
+        // Initialize sound toggle state and mute invisible videos
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.querySelector('.hovr-video-banner__sound-toggle');
+            
+            if (toggle) {
+                muteInvisibleVideos();
+                
+                const visibleVideo = getVisibleVideo();
+                if (visibleVideo && !visibleVideo.muted) {
+                    toggle.classList.add('unmuted');
+                }
+            }
+        });
+        
+        // Handle window resize to mute/unmute appropriate videos
+        window.addEventListener('resize', function() {
+            muteInvisibleVideos();
+        });
+        {% endunless %}
+    </script>
+    
+    <div class="hovr-video-banner__content">
+        <div class="hovr-video-banner__content-inner">
+            {% if block.settings.theme_banner_title != blank %}
+            <h2 class="hovr-video-banner__title">{{ block.settings.theme_banner_title }}</h2>
+            {% endif %}
+            {% if block.settings.theme_banner_subheading != blank %}
+            <p class="hovr-video-banner__subheading">{{ block.settings.theme_banner_subheading }}</p>
+            {% endif %}
+        </div>
+        <div class="hovr-video-banner__buttons">
+            {% if block.settings.theme_banner_button_text != blank %}
+            <button onclick="window.location.href='{{ block.settings.theme_banner_button_url }}'" class="hovr-video-banner__button">{{ block.settings.theme_banner_button_text }}</button>
+            {% endif %}
+            {% if block.settings.theme_banner_button_second_text != blank %}
+            <button onclick="window.location.href='{{ block.settings.theme_banner_button_second_url }}'" class="hovr-video-banner__secondary-button">{{ block.settings.theme_banner_button_second_text }}</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+{% schema %}
+
+  {
+  "name": "Video Banner/Background",
+  "target": "section",
+  "available_if": "{{ app.metafields.seetext.extension_enabled }}",
+  "settings": [
+    {
+        "type": "header",
+        "content": "Video Settings",
+        "info": "Enter the content for the video banner"
+    },
+    {
+        "type": "video",
+        "id": "theme_banner_video_desktop",
+        "label": "Desktop Video"
+    },
+    {
+        "type": "video",
+        "id": "theme_banner_video_mobile",
+        "label": "Mobile Video",
+        "info": "The video banner will default to the desktop video if no mobile video is uploaded"
+    },
+    {
+        "type": "select",
+        "id": "theme_banner_video_sound",
+        "label": "Video Sound",
+        "default": "no_audio",
+        "info": "Select the audio behavior for the video banner",
+        "options": [
+            {
+                "value": "no_audio",
+                "label": "No Audio"
+            },
+            {
+                "value": "start_muted",
+                "label": "Start Muted"
+            },
+            {
+                "value": "start_unmuted",
+                "label": "Start Unmuted"
+            }
+        ]
+    },
+    {
+        "type": "checkbox",
+        "id": "theme_banner_include_margins",
+        "label": "Include Margins",
+        "default": false,
+        "info": "Enable to keep theme margins around the banner"
+    },
+    {
+        "type": "url",
+        "id": "theme_banner_target_url",
+        "label": "Target URL",
+        "info": "Enter the URL for the video banner when clicked"
+    },
+    {
+        "type": "range",
+        "id": "theme_banner_video_height_desktop",
+        "label": "Desktop Video Height (vh)",
+        "default": 50,
+        "min": 10,
+        "max": 100,
+        "step": 5,
+        "info": "Height of the video banner on desktop devices"
+    },
+    {
+        "type": "range",
+        "id": "theme_banner_video_height_mobile",
+        "label": "Mobile Video Height (vh)",
+        "default": 40,
+        "min": 10,
+        "max": 100,
+        "step": 5,
+        "info": "Height of the video banner on mobile devices"
+    },
+    {
+        "type": "header",
+        "content": "Video Banner Content",
+        "info": "Enter the content for the video banner"
+    },
+    {
+        "type": "text",
+        "id": "theme_banner_title",
+        "label": "Video Banner Title"
+    },
+    {
+        "type": "text",
+        "id": "theme_banner_subheading",
+        "label": "Video Banner Subheading"
+    },
+    {
+        "type": "text",
+        "id": "theme_banner_button_text",
+        "label": "Primary Button Text"
+    },
+    {
+        "type": "url",
+        "id": "theme_banner_button_url",
+        "label": "Primary Button URL"
+    },
+    {
+        "type": "text",
+        "id": "theme_banner_button_second_text",
+        "label": "Secondary Button Text"
+    },
+    {
+        "type": "url",
+        "id": "theme_banner_button_second_url",
+        "label": "Secondary Button URL"
+    },
+    {
+        "type": "header",
+        "content": "Typography",
+        "info": "Styling for the typography"
+    },
+    {
+        "type": "range",
+        "id": "theme_banner_title_size",
+        "label": "Title Size",
+        "default": 24,
+        "min": 16,
+        "max": 64,
+        "step": 1
+    },
+    {
+        "type": "color",
+        "id": "theme_banner_title_color",
+        "label": "Title Color",
+        "default": "#000000"
+    },
+    {
+        "type": "range",
+        "id": "theme_banner_subheading_size",
+        "label": "Subheading Size",
+        "default": 16,
+        "min": 12,
+        "max": 48,
+        "step": 1
+    },
+    {
+        "type": "color",
+        "id": "theme_banner_subheading_color",
+        "label": "Subheading Color",
+        "default": "#000000"
+    },
+    {
+        "type": "header",
+        "content": "Buttons",
+        "info": "Styling for the buttons"
+    },
+    {
+        "type": "range",
+        "id": "theme_banner_button_radius",
+        "label": "Button Radius",
+        "default": 0,
+        "min": 0,
+        "max": 50,
+        "step": 1
+    },
+
+    {
+        "type": "color",
+        "id": "theme_banner_primary_button_color",
+        "label": "Primary Button Color",
+        "default": "#000000"
+    },
+
+    {
+        "type": "color",
+        "id": "theme_banner_primary_button_text_color",
+        "label": "Primary Button Text Color",
+        "default": "#ffffff"
+    },
+    {
+        "type": "color",
+        "id": "theme_banner_secondary_button_text_color",
+        "label": "Secondary Button Text Color",
+        "default": "#ffffff"
+    },
+    {
+        "type": "header",
+        "content": "Positioning & Sizing",
+        "info": "Video sizing & content positioning"
+    },
+    {
+        "type": "range",
+        "id": "theme_banner_video_opacity",
+        "label": "Video Opacity",
+        "default": 100,
+        "min": 0,
+        "max": 100,
+        "step": 5
+    },
+
+    {
+        "type": "range",
+        "id": "theme_banner_content_gap",
+        "label": "Content & Button Gap",
+        "default": 20,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    {
+        "type": "text_alignment",
+        "id": "theme_banner_content_alignment",
+        "label": "Text Alignment",
+        "default": "center"
+    },
+    {
+        "type": "select",
+        "id": "theme_banner_content_position",
+        "label": "Content Position",
+        "options": [
+            {
+                "value": "top-left",
+                "label": "Top Left"
+            },
+            {
+                "value": "top",
+                "label": "Top"
+            },
+            {
+                "value": "top-right",
+                "label": "Top Right"
+            },
+            {
+                "value": "middle-left",
+                "label": "Middle Left"
+            },
+            {
+                "value": "middle",
+                "label": "Middle"
+            },
+            {
+                "value": "middle-right",
+                "label": "Middle Right"
+            },
+            {
+                "value": "bottom-left",
+                "label": "Bottom Left"
+            },
+            {
+                "value": "bottom",
+                "label": "Bottom"
+            },
+            {
+                "value": "bottom-right",
+                "label": "Bottom Right"
+            }
+        ],
+        "default": "middle"
+    },
+    {
+        "type": "range",
+        "id": "theme_banner_top_padding",
+        "label": "Top Padding",
+        "default": 0,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    {
+        "type": "range",
+        "id": "theme_banner_bottom_padding",
+        "label": "Bottom Padding",
+        "default": 0,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    {
+        "type": "header",
+        "content": "Custom Styling"
+    },
+    {
+        "type": "textarea",
+        "id": "theme_banner_custom_css",
+        "label": "Custom CSS",
+        "placeholder": ".hovr-video-banner__button { background-color: #000000; }"
+    }
+
+  ]
+  }
+  {% endschema %}

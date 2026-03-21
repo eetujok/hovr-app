@@ -9,11 +9,11 @@ const DashboardEmptyState = ({ navigate }) => {
   return (
     <Card sectioned>
       <EmptyState
-        heading="You have no products with hover videos"
+        heading="You have no products with autoplay or hover videos"
         action={{ content: 'Add video', icon: <Icon source={PlusIcon} />, onAction: () => navigate("/add-video") }}
         image={Illustration}
       >
-        <p>Add hoverable videos to your product images on collection pages, to improve your themes click-through rate.</p>
+        <p>Add autoplay or hover videos to your product images on collections, to improve your conversion rate.</p>
       </EmptyState>
     </Card>
   );

@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "8594daf9c19b6d35cc6917358d5dd64d"
-name = "Hovr: Video On Hover"
+name = "Hovr: Video Section & Tools"
 handle = "hovr-video-on-hover"
 application_url = "https://preview-product.gadget.app/api/shopify/install-or-render"
 embedded = true
@@ -16,7 +16,7 @@ redirect_urls = [
 ]
 
 [webhooks]
-api_version = "2024-07"
+api_version = "2025-07"
 
   [[webhooks.subscriptions]]
   uri = "https://preview-product.gadget.app/api/webhooks/shopify"

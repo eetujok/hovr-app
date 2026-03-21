@@ -152,7 +152,7 @@ const handleCsvSubmit = async () => {
   }
   
    // IF admin store id, show this page
-  if (shop.id === "85532344635") {
+  //if (shop.id === "85532344635") {
   
     return (
       <Page
@@ -219,14 +219,14 @@ const handleCsvSubmit = async () => {
         </div>
       </Page>
     );
-    } else {
-    return (
-      <div>
+   // } else {
+   // return (
+    //  <div>
         <Text>Nothing to see here!</Text>
-      </div>
+    //  </div>
       
-    )
-    }
+   // )
+   // }
 };
 
 export default AdminUploadVideo;

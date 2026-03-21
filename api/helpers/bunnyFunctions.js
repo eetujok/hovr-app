@@ -75,4 +75,42 @@ async function createVideoInBunnyCDN(title) {
         return stream;
   }
 
- export {  bufferToStream, createVideoInBunnyCDN, uploadVideoInBunnyCDN, deleteVideoInBunnyCDN} 
+
+const createVideoInBunnyStorage = async (fileName, videoStream) => {
+
+  const apiUrl = `https://storage.bunnycdn.com/hovr-storage/${fileName}`;
+  const apiKey = process.env.BUNNY_STORAGE_API_KEY;
+
+  const response = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: {
+      'AccessKey': apiKey,
+      'Content-Type': 'application/octet-stream',
+    },
+    body: videoStream,
+  });
+
+  if (!response.ok) {
+    const errorMessage = await response.text();
+    throw new Error(`Failed to upload video: ${response.statusText}. Details: ${errorMessage}`);
+  }
+
+  return await response.json();
+}
+
+const deleteVideoInBunnyStorage = async (fileName) => {
+  const apiUrl = `https://storage.bunnycdn.com/hovr-storage/${fileName}`;
+  const apiKey = process.env.BUNNY_STORAGE_API_KEY;
+
+  const response = await fetch(apiUrl, {
+    method: 'DELETE',
+    headers: {
+      'AccessKey': apiKey,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  return await response.json();
+}
+
+ export {  bufferToStream, createVideoInBunnyCDN, uploadVideoInBunnyCDN, deleteVideoInBunnyCDN, createVideoInBunnyStorage, deleteVideoInBunnyStorage} 

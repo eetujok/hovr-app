@@ -1,5 +1,5 @@
 /* 
-Contains functions for adding and removing Bunny CDN stream links from Product Preview - app-owned metafield.
+Contains functions for adding and removing stream links from Product Preview - app-owned metafield.
 */
 
 const retrieveStreamLinksMetafieldMutation = `
@@ -39,7 +39,7 @@ const getAppMetafields = async (connections, shopId) => {
 
   const shopify = await connections.shopify.forShopId(shopId)
 
-  const response = shopify.graphql(
+  const response = await shopify.graphql(
     retrieveStreamLinksMetafieldMutation
   )
 
@@ -92,7 +92,7 @@ const modifyAppMetafield = async (value, op, connections, shopId, logger) => {
     logger.info(newValues, "Update new values")
   }
 
-  const response = shopify.graphql(`
+  const response = await shopify.graphql(`
       mutation CreateAppDataMetafield($metafieldsSetInput: [MetafieldsSetInput!]!) {
         metafieldsSet(metafields: $metafieldsSetInput) {
           metafields {
@@ -129,7 +129,7 @@ const modifyAppConditionMetafield = async (value, connections, shopId) => {
   const shopify = await connections.shopify.forShopId(shopId)
   const appId = await getAppInstallationId(connections, shopId)
 
-  const response = shopify.graphql(`
+  const response = await shopify.graphql(`
         mutation CreateAppDataMetafield($metafieldsSetInput: [MetafieldsSetInput!]!) {
           metafieldsSet(metafields: $metafieldsSetInput) {
             metafields {
@@ -165,7 +165,7 @@ const getProductFeaturedImage = async (connections, shopId, productId) => {
 
   const shopify = await connections.shopify.forShopId(shopId)
 
-  const response = shopify.graphql(`
+  const response = await shopify.graphql(`
     query getProductFirstImage($productId: ID!) {
       product(id: $productId) {
         id
@@ -184,16 +184,32 @@ const getProductFeaturedImage = async (connections, shopId, productId) => {
 }
 
 const parseImageSrc = (url) => {
-    // Find the position of the last occurrence of 'files/'
-    const lastFilesIndex = url.lastIndexOf('files/');
+    // Check if the URL contains '/products/'
+    const productsIndex = url.indexOf('/products/');
     
-    // If 'files/' is found, extract the substring from that position to the end of the URL
-    if (lastFilesIndex !== -1) {
-        return url.substring(lastFilesIndex);
-    } else {
-        // If 'files/' is not found, return the original URL or handle accordingly
-        return url.slice(-12);
+    if (productsIndex !== -1) {
+        // If '/products/' is found, extract from that point onwards
+        return url.substring(productsIndex);
     }
+    
+    // If '/products/' is not found, check for 'files/'
+    const filesIndex = url.lastIndexOf('files/');
+    
+    if (filesIndex !== -1) {
+        // Look for '/products/' after 'files/'
+        const productsAfterFilesIndex = url.indexOf('/products/', filesIndex);
+        
+        if (productsAfterFilesIndex !== -1) {
+            // If '/products/' is found after 'files/', extract from that point
+            return url.substring(productsAfterFilesIndex);
+        } else {
+            // If no '/products/' after 'files/', return from 'files/'
+            return url.substring(filesIndex);
+        }
+    }
+    
+    // If neither pattern is found, return the last 12 characters as a fallback
+    return url.slice(-12);
 }
 
 

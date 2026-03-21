@@ -10,7 +10,6 @@ export const run = async ({ params, record, logger, api, connections }) => {
 
 /** @type { ActionOnSuccess } */
 export const onSuccess = async ({ params, record, logger, api, connections }) => {
-  // Your logic goes here
 };
 
 /** @type { ActionOptions } */

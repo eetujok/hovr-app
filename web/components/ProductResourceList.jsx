@@ -1,17 +1,14 @@
 import {
   Filters,
-  Card,
   ResourceList,
-  Avatar,
   ResourceItem,
   Text,
-  Spinner,
   Page,
   Thumbnail,
   Box,
   SkeletonThumbnail,
   SkeletonBodyText,
-  Icon,
+  Badge
 } from '@shopify/polaris';
 import { useState, useCallback, useEffect, useRef  } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom'; 
@@ -87,8 +84,8 @@ const ProductResourceList = () => {
     
     if (isNavigating) return; // Prevent multiple clicks
 
-    const { id, title, images } = item;
-    const imageUrl = images?.edges[0]?.node?.source;
+    const { id, title, featuredMedia } = item;
+    const imageUrl = featuredMedia?.file?.image?.originalSrc;
     
     setIsNavigating(true);
     
@@ -98,7 +95,7 @@ const ProductResourceList = () => {
     }
     
     // Navigate and set a timeout to reset the navigation state
-    navigate("/upload-video", { 
+    navigate("/choose-video", { 
       state: { id, title, imageUrl },
       replace: true // Use replace to prevent back navigation
     });
@@ -124,23 +121,17 @@ const ProductResourceList = () => {
   );
 
   const [{ data: products, fetching: fetchingProduct, error: errorFetchingProduct }] = useFindMany(api.shopifyProduct, {
-    search: debouncedQuery,
-    filter: {
-      AND: [
-        { title: { isSet: true } },
-        { status: { equals: 'active'} },
-        { videoSet: { equals: false }}
-        ]
+      search: debouncedQuery,
+      filter: {
+          title: { isSet: true },
       },
       select: {
         id: true,
         title: true,
-        images: {
-          edges: {
-            node: {
-              position: true,
-              source: true,
-            }
+        videoSet: true,
+        featuredMedia: {
+          file: {
+            image: true
           }
         }
       },
@@ -153,9 +144,6 @@ const ProductResourceList = () => {
       const firstFiveProducts = products.slice(0, 5);
       setItems(Object.values(firstFiveProducts));
       console.log("Object array", Object.values(products))
-
-
-
     }
   }, [products]);
 
@@ -170,7 +158,7 @@ const ProductResourceList = () => {
   }
 
   return (
-    <Box background="bg-surface" borderRadius="300" minWidth="70vh" padding='300' borderColor="">
+    <Box background="bg-surface" borderRadius="300" minWidth="50vw" padding='300' borderColor="">
       <ResourceList
         resourceName={resourceName}
         items={fetchingProduct ? Array(5).fill({}) : items}
@@ -184,15 +172,20 @@ const ProductResourceList = () => {
 
 
   function renderItem(item) {
-    const { id, title, images } = item;
-    const media = images?.edges?.length > 0
-    ? <Thumbnail source={images.edges[0].node.source} size="large" />
+    const { id, title, featuredMedia } = item;
+    const media = featuredMedia?.file?.image?.originalSrc
+    ? <Thumbnail source={featuredMedia?.file?.image?.originalSrc} size="large" />
     : <Thumbnail source={FallbackImage} size="large"/>
     return (
-      <ResourceItem id={id} media={media} verticalAlignment="center" onClick={() => handleItemClick(item)}>
-        <Text variant="bodyMd" fontWeight="bold" as="h3">
-          {title}
-        </Text>
+      <ResourceItem id={id} disabled={item.videoSet}  media={media} verticalAlignment="center" onClick={() => handleItemClick(item)}>
+        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', maxWidth: '300px'}}>
+          <Text variant="bodyMd" fontWeight="bold" as="h3">
+            {title}
+          </Text>
+          {item.videoSet && <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+            <Badge tone="success">Video Set</Badge>
+          </span>}
+        </div>
       </ResourceItem>
     );
   }
