@@ -5,7 +5,7 @@
 ## Introduction
 
 Hovr solves product videos being buried on product pages by bringing video content directly to collection pages.
-Dynamic data and settings input from the Admin UI are ingested into storefront extensions using the app backend and app metafields.
+Videos and settings input from the Shopify Admin are ingested into storefront extensions using the app backend and app metafields.
 
 The app extensions can be viewed on the demo store:
 https://seetext.myshopify.com/
